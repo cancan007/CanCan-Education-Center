@@ -16,6 +16,7 @@ export default function AddReference() {
     const [tags, setTags] = useState([])
 
     const [langs, setLangs] = useState([])
+    const [flagUrlPdf, setFlag] = useState(false)
 
     const [loadingState, setLoadingState] = useState("not-loaded")
 
@@ -31,7 +32,7 @@ export default function AddReference() {
 
     useEffect(() => {
         setRefeTags(reference.tags)
-        console.log(refeTags)
+        //console.log(refeTags)
     }, [reference])
 
 
@@ -76,7 +77,7 @@ export default function AddReference() {
             .then(res => {
                 data3 = res
                 setLangs(data3.languages)
-                console.log(data3.languages);
+                //console.log(data3.languages);
             }).catch(err => console.error(err))
     }
 
@@ -122,6 +123,39 @@ export default function AddReference() {
         loadTags()
     }
 
+    async function createUrl(e) {
+        const file = e.target.files[0]
+        const added = await client.add(file, { progress: (prog) => console.log(`received: ${prog}`) })
+        const url = `https://ipfs.infura.io/ipfs/${added.path}`
+
+        updateReference({ ...reference, url: url })
+    }
+
+    async function addNewReference() {
+
+        if (!reference.url || !reference.title || !reference.description || !reference.language || !reference.category) return
+        let tag_ids = []
+        for (let i = 0; i < reference.tags.length; i++) {
+            let tag = reference.tags[i];
+            tag_ids.push(tag.id)
+        }
+
+
+        await fetch("http://localhost:5000/api/references/add", {
+            method: "POST",
+            mode: "cors",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ ...reference, tags: tag_ids })
+        }).then(res => res.text())
+            .then(res => {
+                console.log(res)
+                window.location.href = `/${reference.category.toLowerCase()}`
+            })
+            .catch(err => console.error(err));
+    }
+
     const flagTag = reference.language && reference.category;
 
     return (
@@ -131,7 +165,7 @@ export default function AddReference() {
                     <input
                         placeholder="Title"
                         className="mt-8 border rounded p-4"
-                        onChange={e => updateReference({ ...reference, name: e.target.value })} />
+                        onChange={e => updateReference({ ...reference, title: e.target.value })} />
                     <textarea
                         placeholder="Description"
                         className="mt-2 border rounded p-4"
@@ -207,9 +241,9 @@ export default function AddReference() {
                                 <Menu.Items className="origin-top-right absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none">
                                     <div className="py-1">
                                         {categories.map((cat, i) => (
-                                            <Menu.Item>
+                                            <Menu.Item key={i}>
                                                 {({ active }) => (
-                                                    <button key={i}
+                                                    <button
 
                                                         className={classNames(
                                                             active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
@@ -254,9 +288,9 @@ export default function AddReference() {
                                 <Menu.Items className="origin-top-right absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none">
                                     <div className="py-1">
                                         {tags.map((tag, i) => (
-                                            <Menu.Item>
+                                            <Menu.Item key={i}>
                                                 {({ active }) => (
-                                                    <button key={i}
+                                                    <button
 
                                                         className={classNames(
                                                             active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
@@ -277,8 +311,21 @@ export default function AddReference() {
 
                     </div>
 
-                    <input type="file" name="Add reference" className="my-4" onChange={e => updateReference({ ...reference, url: e.target.value })} />
-                    <button className="font-bold mt-4 bg-blue-500 hover:bg-blue-700 text-white rounded p-4 shadow-lg">Provide reference</button>
+                    <div className="flex">
+                        <button className="bg-transparent hover:bg-blue-500 text-blue-700 font-semibold hover:text-white py-2 px-4 border border-blue-500 hover:border-transparent rounded" onClick={() => setFlag(false)}>URL</button>
+                        <button className="bg-transparent hover:bg-blue-500 text-blue-700 font-semibold hover:text-white ml-2 py-2 px-4 border border-blue-500 hover:border-transparent rounded" onClick={() => setFlag(true)}>PDF</button>
+                    </div>
+
+                    {
+                        flagUrlPdf && <input type="file" name="Add reference" className="my-4" onChange={e => createUrl(e)} />
+                    }
+                    {
+                        !flagUrlPdf && <input
+                            placeholder="Add reference's URL"
+                            className="mt-8 border rounded p-4"
+                            onChange={e => updateReference({ ...reference, url: e.target.value })} />
+                    }
+                    <button className="font-bold mt-4 bg-blue-500 hover:bg-blue-700 text-white rounded p-4 shadow-lg" onClick={() => addNewReference()}>Provide reference</button>
                 </div>
             </div>
             <div className="w-1/3">

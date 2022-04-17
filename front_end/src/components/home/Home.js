@@ -10,7 +10,7 @@ export default function Home() {
             <div className="flex justify-center mb-6">
                 <div className="flex flex-col">
                     <h1 className="text-4xl my-6">My philosophy</h1>
-                    <div class="text">
+                    <div className="text">
                         <p className="text-xl"> CanCan Education Center was created for providing educational opportunities to any children.</p>
                         <p className="text-xl">In the world, there are 60 million children who can't go to school and get an education.</p>
                         <p className="text-xl">And it is one cause of a poverty's cycle.</p>
