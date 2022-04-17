@@ -6,7 +6,8 @@ var logger = require('morgan');
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
-
+require('dotenv').config();
+var cors = require('cors')
 var app = express();
 
 // view engine setup
@@ -18,6 +19,14 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+
+if (process.env.APP_ENVIRONMENT === "development") {
+  app.use(cors({
+    origin: 'http://localhost:3000', //アクセス許可するオリジン
+    credentials: true, //レスポンスヘッダーにAccess-Control-Allow-Credentials追加
+    optionsSuccessStatus: 200 //レスポンスstatusを200に設定
+  }))
+}
 
 //app.use('/', indexRouter);
 //app.use('/users', usersRouter);

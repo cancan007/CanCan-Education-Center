@@ -7,6 +7,26 @@ const validateMid = require("../middleware/validate")
 router.post("/", async (req, res) => {
     let references = [];
     if (req.body.filter) {
+        if (req.body.language === "") {
+            references = await Reference.find(
+                {
+                    $and: [
+                        {
+                            $and: [{
+
+                                "category": req.body.category
+                            }]
+                        },
+                        {
+                            $or: [{
+                                "title": { "$regex": req.body.filter },
+                                //"description": { "$regex": req.body.filter }
+                            }]
+                        }
+                    ]
+                }
+            ).catch(err => console.error(err));
+        }
         references = await Reference.find(
             {
                 $and: [
@@ -27,7 +47,13 @@ router.post("/", async (req, res) => {
         ).catch(err => console.error(err));
     }
     else if (!req.body.filter) {
-        references = await Reference.find({ "language": req.body.language, "category": req.body.category })
+        if (req.body.language === "") {
+            references = await Reference.find({ "category": req.body.category })
+        }
+        else {
+            references = await Reference.find({ "language": req.body.language, "category": req.body.category })
+        }
+
     }
 
     res.json(references);
@@ -47,6 +73,19 @@ router.post("/tag", async (req, res) => {
         }
     }))
     res.json(references);
+})
+
+router.get("/language", async (req, res) => {
+    let langs = [];
+    let refes = await Reference.find();
+    for (let i = 0; i < refes.length; i++) {
+        if (!langs.includes(refes[i].language)) {
+            langs.push(refes[i].language)
+        }
+    }
+    langs.sort()
+    langs = { "languages": langs }
+    res.json(langs)
 })
 
 router.post("/add", validateMid(validate), async (req, res) => {

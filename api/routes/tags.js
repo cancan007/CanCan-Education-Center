@@ -4,8 +4,13 @@ const router = express.Router();
 const validateMid = require("../middleware/validate")
 
 
-router.get("/", async (req, res) => {
-    const tags = await Tag.find({ "language": req.body.language, "category": req.body.category });
+router.post("/get", async (req, res) => {
+    let tags;
+    if (req.body.language === "") {
+        tags = await Tag.find({ "category": req.body.category }).sort("name");
+    } else {
+        tags = await Tag.find({ "language": req.body.language, "category": req.body.category }).sort("name");
+    }
     res.json(tags);
 })
 
