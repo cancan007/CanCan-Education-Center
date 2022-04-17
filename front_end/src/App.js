@@ -2,6 +2,7 @@ import logo from './logo.svg';
 import './App.css';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import Home from "./components/home/Home";
+import AddReference from './components/add-reference/AddReference';
 import Math from "./components/math/Math";
 import Science from "./components/science/Science";
 import Language from './components/language/Language';
@@ -86,6 +87,7 @@ function App() {
           <BrowserRouter>
             <Routes>
               <Route exact path="/" element={<Home />} />
+              <Route exact path="/add-reference" element={<AddReference />} />
               <Route path="/math" element={<Math />} />
               <Route path="/science" element={<Science />} />
               <Route path="/language" element={<Language />} />
@@ -94,7 +96,6 @@ function App() {
               <Route path="/geography" element={<Geography />} />
               <Route path="/music" element={<Music />} />
               <Route path="/programming" element={<Programming />} />
-
             </Routes>
 
           </BrowserRouter>
