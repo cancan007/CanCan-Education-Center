@@ -24,7 +24,8 @@ export default function Language() {
     }, [])
 
     async function loadRefes() {
-        await fetch("http://localhost:5000/api/references", {
+        const uri = process.env.REACT_APP_ENVIRONMENT === "development" ? "http://localhost:5000/api/references" : "/api/references"
+        await fetch(uri, {
             method: "POST",
             mode: "cors",
             headers: {
@@ -59,7 +60,8 @@ export default function Language() {
     }
 
     async function loadTags() {
-        await fetch("http://localhost:5000/api/tags/get", {
+        const uri = process.env.REACT_APP_ENVIRONMENT === "development" ? "http://localhost:5000/api/tags/get" : "/api/tags/get"
+        await fetch(uri, {
             method: "POST",
             mode: "cors",
             headers: {
@@ -86,7 +88,8 @@ export default function Language() {
     }
 
     async function loadLangs() {
-        await fetch("http://localhost:5000/api/references/language", {
+        const uri = process.env.REACT_APP_ENVIRONMENT === "development" ? "http://localhost:5000/api/references/language" : "/api/references/language"
+        await fetch(uri, {
             method: "GET",
             mode: "cors",
             headers: {
@@ -102,7 +105,8 @@ export default function Language() {
     }
 
     async function loadWithTag(tag) {
-        await fetch("http://localhost:5000/api/references/tag", {
+        const uri = process.env.REACT_APP_ENVIRONMENT === "development" ? "http://localhost:5000/api/references/tag" : "/api/references/tag"
+        await fetch(uri, {
             method: "POST",
             mode: "cors",
             headers: {

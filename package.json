@@ -1,0 +1,21 @@
+{
+  "name": "cancaneducationcenter",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "npm run --prefix ./api/ start",
+    "start": "npm run --prefix ./api/ start",
+    "heroku-postbuild": "cd front_end && npm install && npm run build && cd ../ && cd api && npm install"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cancan007/CanCan-Education-Center.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/cancan007/CanCan-Education-Center/issues"
+  },
+  "homepage": "https://github.com/cancan007/CanCan-Education-Center#readme"
+}

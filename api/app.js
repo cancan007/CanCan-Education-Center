@@ -19,10 +19,11 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, '../front_end/build')));  // to use React's static files
 
 if (process.env.APP_ENVIRONMENT === "development") {
   app.use(cors({
-    origin: 'http://localhost:3000', //アクセス許可するオリジン
+    origin: ['http://localhost:3000', 'http://localhost:5000'], //アクセス許可するオリジン
     credentials: true, //レスポンスヘッダーにAccess-Control-Allow-Credentials追加
     optionsSuccessStatus: 200 //レスポンスstatusを200に設定
   }))
@@ -32,6 +33,10 @@ if (process.env.APP_ENVIRONMENT === "development") {
 //app.use('/users', usersRouter);
 require("./startups/db")();
 require("./startups/routes")(app);
+
+app.use("*", (req, res) => {
+  res.sendFile(path.join(__dirname, '../front_end/build/index.html'));  // to show React's front end in this server
+})
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
