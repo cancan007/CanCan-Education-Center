@@ -26,25 +26,27 @@ router.post("/", async (req, res) => {
                     ]
                 }
             ).catch(err => console.error(err));
+        } else {
+            references = await Reference.find(
+                {
+                    $and: [
+                        {
+                            $and: [{
+                                "language": req.body.language,
+                                "category": req.body.category
+                            }]
+                        },
+                        {
+                            $or: [{
+                                "title": { "$regex": req.body.filter },
+                                //"description": { "$regex": req.body.filter }
+                            }]
+                        }
+                    ]
+                }
+            ).catch(err => console.error(err));
         }
-        references = await Reference.find(
-            {
-                $and: [
-                    {
-                        $and: [{
-                            "language": req.body.language,
-                            "category": req.body.category
-                        }]
-                    },
-                    {
-                        $or: [{
-                            "title": { "$regex": req.body.filter },
-                            //"description": { "$regex": req.body.filter }
-                        }]
-                    }
-                ]
-            }
-        ).catch(err => console.error(err));
+
     }
     else if (!req.body.filter) {
         if (req.body.language === "") {
@@ -61,7 +63,14 @@ router.post("/", async (req, res) => {
 
 router.post("/tag", async (req, res) => {
     let references = [];
-    let datas = await Reference.find({ "language": req.body.language, "category": req.body.category });
+    let datas;
+    if (req.body.language) {
+        datas = await Reference.find({ "language": req.body.language, "category": req.body.category });
+    }
+    else {
+        datas = await Reference.find({ "category": req.body.category });
+    }
+
     await Promise.all(datas.map(async i => {
         let tags = i.tags;
         for (let m = 0; m < tags.length; m++) {
@@ -72,7 +81,7 @@ router.post("/tag", async (req, res) => {
             }
         }
     }))
-    res.json(references);
+    return res.json(references);
 })
 
 router.get("/language", async (req, res) => {
@@ -85,7 +94,7 @@ router.get("/language", async (req, res) => {
     }
     langs.sort()
     langs = { "languages": langs }
-    res.json(langs)
+    return res.json(langs)
 })
 
 router.post("/add", validateMid(validate), async (req, res) => {
@@ -105,13 +114,13 @@ router.post("/add", validateMid(validate), async (req, res) => {
         tags: refes
     })
     newrefe = await newrefe.save();
-    res.send("Succeeded to add new reference!");
+    return res.send("Succeeded to add new reference!");
 })
 
 router.delete("/", async (req, res) => {
     let refe = await Reference.deleteOne({ "_id": req.body._id });
     console.log(`Succeeded to delete reference!`);
-    res.send(`Succeeded to delete reference!`);
+    return res.send(`Succeeded to delete reference!`);
 })
 
 module.exports = router;

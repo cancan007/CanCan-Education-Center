@@ -132,9 +132,10 @@ export default function Math() {
             }
             return item
         }))
+        console.log(items)
         setRefes(items);
         setLoadingState("loaded")
-        console.log(refes)
+        //console.log(refes)
     }
 
     async function refresh() {
