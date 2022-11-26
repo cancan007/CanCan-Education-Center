@@ -34,7 +34,7 @@ export default function Geography() {
 
   const { data: languages, refetch: refetchLanguages } = useAPIFetchLanguages({
     onSuccess: (res) => {
-      setLangs(res.languages);
+      setLangs(res);
     },
   });
 

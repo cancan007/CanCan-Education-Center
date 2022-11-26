@@ -34,7 +34,7 @@ export default function History() {
 
   const { data: languages, refetch: refetchLanguages } = useAPIFetchLanguages({
     onSuccess: (res) => {
-      setLangs(res.languages);
+      setLangs(res);
     },
   });
 

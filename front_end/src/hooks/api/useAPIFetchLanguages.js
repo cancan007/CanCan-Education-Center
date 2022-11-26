@@ -6,6 +6,7 @@ async function fetchLangs() {
     process.env.REACT_APP_ENVIRONMENT === "development"
       ? "http://localhost:5001/api/references/language"
       : "/api/references/language";
+  console.log(uri);
   await fetch(uri, {
     method: "GET",
     mode: "cors",
