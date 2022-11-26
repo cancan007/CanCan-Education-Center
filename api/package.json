@@ -4,7 +4,8 @@
   "private": true,
   "scripts": {
     "start": "node ./bin/www",
-    "test": "APP_ENVIRONMENT=test node ./bin/www"
+    "test": "APP_ENVIRONMENT=test node ./bin/www",
+    "dev": "APP_ENVIRONMENT=development node ./bin/www"
   },
   "dependencies": {
     "cookie-parser": "~1.4.4",

@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useState, memo } from "react";
 import { Fragment } from "react";
 import { Menu, Transition } from "@headlessui/react";
 import { ChevronDownIcon } from "@heroicons/react/solid";
@@ -18,7 +18,7 @@ const ReferenceList = ({
   return (
     <div className="flex">
       <div className="flex flex-col divide-y divide-solid w-full md:w-2/3 px-20 md:px-0">
-        <h1 className="text-3xl font-bold">Geography References</h1>
+        <h1 className="text-3xl font-bold">{formInput.category} References</h1>
         {refes.length === 0 ? (
           <h1 className="text-4xl">No references</h1>
         ) : (
@@ -108,26 +108,27 @@ const ReferenceList = ({
             >
               <Menu.Items className="origin-top-right absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none">
                 <div className="py-1">
-                  {langs.map((lang, i) => (
-                    <Menu.Item>
-                      {({ active }) => (
-                        <button
-                          key={i}
-                          className={classNames(
-                            active
-                              ? "bg-gray-100 text-gray-900"
-                              : "text-gray-700",
-                            "block px-4 py-2 text-sm w-full"
-                          )}
-                          onClick={() =>
-                            updateFormInput({ ...formInput, language: lang })
-                          }
-                        >
-                          {lang}
-                        </button>
-                      )}
-                    </Menu.Item>
-                  ))}
+                  {langs &&
+                    langs.map((lang, i) => (
+                      <Menu.Item>
+                        {({ active }) => (
+                          <button
+                            key={i}
+                            className={classNames(
+                              active
+                                ? "bg-gray-100 text-gray-900"
+                                : "text-gray-700",
+                              "block px-4 py-2 text-sm w-full"
+                            )}
+                            onClick={() =>
+                              updateFormInput({ ...formInput, language: lang })
+                            }
+                          >
+                            {lang}
+                          </button>
+                        )}
+                      </Menu.Item>
+                    ))}
                 </div>
               </Menu.Items>
             </Transition>
@@ -150,4 +151,4 @@ const ReferenceList = ({
   );
 };
 
-export default ReferenceList;
+export default memo(ReferenceList);

@@ -3,12 +3,16 @@ import { useEffect, useState } from "react";
 import { Fragment } from "react";
 import { Menu, Transition } from "@headlessui/react";
 import { ChevronDownIcon } from "@heroicons/react/solid";
+import { useAPIFetchTags } from "../../hooks/api/useAPIFetchTags";
+import { useAPIFetchLanguages } from "../../hooks/api/useAPIFetchLanguages";
+import { useAPISaveNewTag } from "../../hooks/api/useAPISaveNewTag";
+import { uploadFileToIpfs } from "../../hooks/api/useAPISaveFileToIpfs";
+import { pinataDedicatedDomain } from "../../utils/constants";
+import { useAPISaveNewReference } from "../../hooks/api/useAPISaveNewReference";
 
 const client = ipfsHttpClient("https://ipfs.infura.io:5001/api/v0");
 
 export default function AddReference() {
-  let data2;
-  let data3;
   let [refeTags, setRefeTags] = useState([]);
   const categories = [
     "Math",
@@ -28,20 +32,22 @@ export default function AddReference() {
     category: "",
     tags: [],
   });
+  console.log(reference);
   const [formTag, updateTag] = useState({ name: "" }); // use reference's language, category
   const [tags, setTags] = useState([]);
 
   const [langs, setLangs] = useState([]);
   const [flagUrlPdf, setFlag] = useState(false);
+  const [file, setFile] = useState(false);
 
   const [loadingState, setLoadingState] = useState("not-loaded");
 
   useEffect(() => {
-    loadLangs();
+    refetchLanguages();
   }, []);
 
   useEffect(() => {
-    loadTags();
+    setTimeout(() => refetchTags(), 100);
   }, [reference.language, reference.category]);
 
   useEffect(() => {
@@ -49,54 +55,20 @@ export default function AddReference() {
     //console.log(refeTags)
   }, [reference]);
 
-  async function loadTags() {
-    if (!reference.language || !reference.category) return;
-    await fetch("http://localhost:5001/api/tags/get", {
-      method: "POST",
-      mode: "cors",
-      headers: {
-        "Content-Type": "application/json",
+  const { refetch: refetchTags } = useAPIFetchTags(
+    { ...reference },
+    {
+      onSuccess: (res) => {
+        setTags(res);
       },
-      body: JSON.stringify({ ...reference }),
-    })
-      .then((res) => res.text())
-      .then((res) => JSON.parse(res))
-      .then((res) => {
-        data2 = res;
-      })
-      .catch((err) => console.error(err));
-    const items = await Promise.all(
-      data2.map(async (i) => {
-        let item = {
-          name: i.name,
-          language: i.language,
-          category: i.category,
-          id: i._id,
-        };
-        return item;
-      })
-    );
-    console.log(items);
-    setTags(items);
-  }
+    }
+  );
 
-  async function loadLangs() {
-    await fetch("http://localhost:5001/api/references/language", {
-      method: "GET",
-      mode: "cors",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    })
-      .then((res) => res.text())
-      .then((res) => JSON.parse(res))
-      .then((res) => {
-        data3 = res;
-        setLangs(data3.languages);
-        //console.log(data3.languages);
-      })
-      .catch((err) => console.error(err));
-  }
+  const { refetch: refetchLanguages } = useAPIFetchLanguages({
+    onSuccess: (res) => {
+      setLangs(res);
+    },
+  });
 
   function addTag(tag) {
     let tags = reference.tags;
@@ -120,73 +92,34 @@ export default function AddReference() {
     return classes.filter(Boolean).join(" ");
   }
 
-  async function addPostTag() {
-    if (!formTag.name || !reference.language || !reference.category) return;
-    let reqTag = {
-      name: formTag.name,
-      language: reference.language,
-      category: reference.category,
-    };
-    await fetch("http://localhost:5001/api/tags", {
-      method: "POST",
-      mode: "cors",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(reqTag),
-    })
-      .then((res) => res.text())
-      .then((res) => console.log(res))
-      .catch((err) => console.error(err));
-    loadTags();
-  }
+  const { mutate: mutateSaveNewTag } = useAPISaveNewTag({
+    onSuccess: (res) => {
+      refetchTags();
+      updateTag({ ...formTag, name: "" });
+    },
+  });
 
   async function createUrl(e) {
-    const file = e.target.files[0];
-    const added = await client.add(file, {
-      progress: (prog) => console.log(`received: ${prog}`),
-    });
-    const url = `https://ipfs.infura.io/ipfs/${added.path}`;
-
+    if (!file) {
+      alert("You didn't select the file yet");
+      return;
+    } else if (reference.url) {
+      alert("You already uploaded file");
+      return;
+    }
+    alert("This file will not be deleted. If you are fine, please confirm!");
+    const res = await uploadFileToIpfs(file);
+    let url = `https://${pinataDedicatedDomain}/ipfs/${res.IpfsHash}`;
     updateReference({ ...reference, url: url });
   }
 
-  async function addNewReference() {
-    if (
-      !reference.url ||
-      !reference.title ||
-      !reference.description ||
-      !reference.language ||
-      !reference.category
-    )
-      return;
-    let tag_ids = [];
-    for (let i = 0; i < reference.tags.length; i++) {
-      let tag = reference.tags[i];
-      tag_ids.push(tag.id);
-    }
-
-    await fetch("http://localhost:5001/api/references/add", {
-      method: "POST",
-      mode: "cors",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ ...reference, tags: tag_ids }),
-    })
-      .then((res) => res.text())
-      .then((res) => {
-        console.log(res);
-        window.location.href = `/${reference.category.toLowerCase()}`;
-      })
-      .catch((err) => console.error(err));
-  }
+  const { mutate: mutateSaveNewReference } = useAPISaveNewReference();
 
   const flagTag = reference.language && reference.category;
 
   return (
-    <div className="flex">
-      <div className="flex justify-center w-2/3">
+    <div className="flex flex-col-reverse md:flex-row">
+      <div className="flex flex-col md:flex-row justify-center items-center w-full md:w-2/3">
         <div className="flex flex-col pb-12">
           <input
             placeholder="Title"
@@ -236,26 +169,30 @@ export default function AddReference() {
               >
                 <Menu.Items className="origin-top-right absolute z-10 right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none">
                   <div className="py-1">
-                    {langs.map((lang, i) => (
-                      <Menu.Item>
-                        {({ active }) => (
-                          <button
-                            key={i}
-                            className={classNames(
-                              active
-                                ? "bg-gray-100 text-gray-900"
-                                : "text-gray-700",
-                              "block px-4 py-2 text-sm w-full"
-                            )}
-                            onClick={() =>
-                              updateReference({ ...reference, language: lang })
-                            }
-                          >
-                            {lang}
-                          </button>
-                        )}
-                      </Menu.Item>
-                    ))}
+                    {langs &&
+                      langs.map((lang, i) => (
+                        <Menu.Item>
+                          {({ active }) => (
+                            <button
+                              key={i}
+                              className={classNames(
+                                active
+                                  ? "bg-gray-100 text-gray-900"
+                                  : "text-gray-700",
+                                "block px-4 py-2 text-sm w-full"
+                              )}
+                              onClick={() =>
+                                updateReference({
+                                  ...reference,
+                                  language: lang,
+                                })
+                              }
+                            >
+                              {lang}
+                            </button>
+                          )}
+                        </Menu.Item>
+                      ))}
                   </div>
                 </Menu.Items>
               </Transition>
@@ -390,12 +327,24 @@ export default function AddReference() {
           </div>
 
           {flagUrlPdf && (
-            <input
-              type="file"
-              name="Add reference"
-              className="my-4"
-              onChange={(e) => createUrl(e)}
-            />
+            <div className="flex flex-col">
+              <input
+                type="file"
+                name="Add reference"
+                className="my-4"
+                onChange={(e) => setFile(e.target.files[0])}
+              />
+              {file && (
+                <button
+                  className="bg-transparent hover:bg-pink-500 text-pink-700 font-semibold hover:text-white py-2 px-4 border border-pink-500 hover:border-transparent rounded"
+                  onClick={createUrl}
+                >
+                  {reference.url
+                    ? "Succeeded to upload file!"
+                    : "Upload file to IPFS"}
+                </button>
+              )}
+            </div>
           )}
           {!flagUrlPdf && (
             <input
@@ -407,24 +356,25 @@ export default function AddReference() {
             />
           )}
           <button
-            className="font-bold mt-4 bg-blue-500 hover:bg-blue-700 text-white rounded p-4 shadow-lg"
-            onClick={() => addNewReference()}
+            className="font-bold mt-4 bg-transparent border-2 border-pink-500 hover:border-pink-200 text-pink-700 hover:text-pink-300 rounded p-4 shadow-lg"
+            onClick={() => mutateSaveNewReference({ reference })}
           >
             Provide reference
           </button>
         </div>
       </div>
-      <div className="w-1/3">
+      <div className="w-full md:w-1/3 flex flex-col items-center">
         {flagTag && (
           <div className="flex">
             <input
               placeholder="Add new tag"
               className="mt-2 border rounded p-4"
+              value={formTag.name}
               onChange={(e) => updateTag({ ...formTag, name: e.target.value })}
             />
             <button
               className="bg-blue-500 hover:bg-blue-700 text-white rounded-lg m-3 px-2 shadow-lg"
-              onClick={() => addPostTag()}
+              onClick={() => mutateSaveNewTag({ formTag, reference })}
             >
               Add Tag
             </button>

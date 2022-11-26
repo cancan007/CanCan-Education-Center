@@ -17,9 +17,9 @@ async function fetchLangs() {
     .then((res) => JSON.parse(res))
     .then((res) => {
       data3 = res;
-      return data3.languages;
     })
     .catch((err) => console.error(err));
+  return data3.languages;
 }
 
 export const useAPIFetchLanguages = (options) => {
