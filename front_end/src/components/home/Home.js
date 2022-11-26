@@ -23,11 +23,11 @@ export default function Home() {
               education makes our world better.
             </p>
             <br></br>
-            <p className="text-xl flex flex-row">
+            <p className="text-xl">
               This web site is just a first step to create the system with
-              <p className="text-xl text-blue-700 ml-2">
+              <span className="text-xl text-blue-700 ml-2">
                 decentralized systems (Blockchain, IPFS etc...)
-              </p>
+              </span>
               .
             </p>
             <p className="text-xl">
@@ -61,8 +61,8 @@ export default function Home() {
             </p>
             <p className="text-xl">Or plese visit our website from below</p>
             <a href="https://www.vision-swipe.com/">
-              <p className="text-xl text-pink-500 hover:text-pink-300 cursor-pointer">
-                Go to site!
+              <p className="text-2xl font-semibold text-pink-500 hover:text-pink-300 cursor-pointer">
+                Go to our site!
               </p>
             </a>
           </div>

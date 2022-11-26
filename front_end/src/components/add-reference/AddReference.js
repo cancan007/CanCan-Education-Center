@@ -119,7 +119,7 @@ export default function AddReference() {
 
   return (
     <div className="flex flex-col-reverse md:flex-row">
-      <div className="flex flex-col md:flex-row justify-center items-center w-full md:w-2/3">
+      <div className="flex flex-col md:flex-row justify-center items-center w-full md:w-2/3 px-20 md:px-0">
         <div className="flex flex-col pb-12">
           <input
             placeholder="Title"
