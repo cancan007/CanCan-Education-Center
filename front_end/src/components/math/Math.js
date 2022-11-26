@@ -41,6 +41,7 @@ export default function Math() {
   const { data: referencesByTag, refetch: refetchReferencesByTag } =
     useAPIFetchWithTags(formInput, tag, {
       onSuccess: (res) => {
+        if (res.length === 0) return;
         setRefes(res);
       },
     });
