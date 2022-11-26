@@ -6,7 +6,7 @@
   "scripts": {
     "test": "npm run --prefix ./api/ start",
     "start": "npm run --prefix ./api/ start",
-    "heroku-postbuild": "cd front_end && npm install && npm run build && cd ../ && cd api && npm install"
+    "heroku-postbuild": "cd ../ && cd api && npm install"
   },
   "repository": {
     "type": "git",
